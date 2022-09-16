@@ -8,8 +8,9 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 moveVelocity;
     public float speed = 20;
-    
-    
+    private Vector3 mousePosition;
+    private Vector2 currentDirection = new Vector3(0f, 1f, 0f);
+    public float rotateSpeed = 5f;
     public float health;
     public float maxHealth;
     public int armor;
@@ -17,17 +18,23 @@ public class Player : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-    }       
+    }
+
+    protected void Walk()
+    {
+        mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 difference = mousePosition - transform.position;
+        difference.Normalize();
+        currentDirection = Vector2.Lerp(currentDirection, difference, Time.deltaTime * rotateSpeed);
+        transform.up = currentDirection;
+    }   
 
     void Update()
-    {        
+    {
+        Walk();
+
         Vector2 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         moveVelocity = moveInput.normalized * speed;
-
-        if (Input.GetAxis("Horizontal") != 0)
-        {
-            Flip();
-        }
     }
 
     private void FixedUpdate()
@@ -49,18 +56,6 @@ public class Player : MonoBehaviour
         if (health <= 0)
         {
             Destroy(gameObject);
-        }
-    }
-
-    private void Flip()
-    {
-        if (Input.GetAxisRaw("Horizontal") == 1)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
-        else if (Input.GetAxisRaw("Horizontal") == -1)
-        {
-            transform.localScale = new Vector3(1, 1, 1);
         }
     }
 }
